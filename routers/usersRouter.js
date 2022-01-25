@@ -1,6 +1,7 @@
 const router = require('express').Router();
-const { addUser, userLogin, getAllUsers, updateUser, updateUserStatus, deleteUser } = require('../controllers/usersController');
+const { addUser, userLogin, getAllUsers, updateUser, updateUserStatus, deleteUser, uploadFile } = require('../controllers/usersController');
 const { addUserValidators, addUserValidationHandler } = require("../middlewares/user/userValidators");
+const fileUpload = require("../middlewares/user/fileUpload");
 
 router.get('/', (req, res) => {
   res.send("User router is working")
@@ -8,6 +9,7 @@ router.get('/', (req, res) => {
 
 router.post('/register', addUserValidators ,addUserValidationHandler, addUser)
 router.post('/login', userLogin)
+router.post('/file/upload', fileUpload, uploadFile)
 
 router.get('/allUsers', getAllUsers)
 

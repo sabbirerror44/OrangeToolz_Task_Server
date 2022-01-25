@@ -12,6 +12,12 @@ model admin {
   password String @db.VarChar(255)
 }
 
+model files {
+  id   Int    @id @default(autoincrement())
+  name String @db.VarChar(255)
+  file String @db.VarChar(255)
+}
+
 model users {
   name     String @db.VarChar(255)
   password String @db.VarChar(200)

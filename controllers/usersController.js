@@ -2,6 +2,8 @@ const bcrypt = require('bcrypt');
 const jwt = require("jsonwebtoken");
 const {PrismaClient} = require('@prisma/client');
 const prisma = new PrismaClient();
+const createError = require("http-errors");
+
 
 //Registration of o new user
 async function addUser(req, res, next) {
@@ -146,6 +148,33 @@ async function deleteUser(req, res, next){
   
 }
 
+// upload file and file info
+async function uploadFile(req, res, next) {
+  let newfile;
+  if (req.files && req.files.length > 0) {
+
+  const newfile = {...req.body, file: req.files[0].filename }
+  console.log(newfile);
+  //save file or send error
+    try {
+      const toBeAddedfile = await prisma.files.create({
+        data: newfile
+      });
+
+      res.status(200).json({
+        message: "File added successfully!",
+      });
+    } catch (err) {
+      res.status(500).json({
+        errors: {
+          common: {
+            msg: err.message,
+          },
+        },
+      });
+    }
+  }
+}
 
 
 module.exports = {
@@ -155,5 +184,5 @@ module.exports = {
     updateUser,
     deleteUser,
     updateUserStatus,
-    
+    uploadFile,   
 }
