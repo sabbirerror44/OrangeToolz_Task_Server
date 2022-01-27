@@ -148,12 +148,13 @@ async function uploadFile(req, res, next) {
   if (req.files && req.files.length > 0) {
 
   const newfile = {...req.body, file: req.files[0].filename }
-  console.log(newfile);
   //save file or send error
     try {
-      const toBeAddedfile = await prisma.files.create({
-        data: newfile
-      });
+      // const toBeAddedFile = await prisma.files.create({
+      //   data: newfile
+      // });
+
+      console.log(newfile);
 
       res.status(200).json({
         message: "File added successfully!",

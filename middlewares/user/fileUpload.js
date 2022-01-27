@@ -1,9 +1,9 @@
 const uploader = require("../../utilities/singleUploader");
 
-function flatAvatarUpload(req, res, next) {
+function fileUpload(req, res, next) {
   const upload = uploader(
     "files",
-    ["text/plain", "text/csv"],
+    ["text/plain", "text/csv", "application/vnd.ms-excel"],
     100000000,
     "Only csv & text files are allowed!"
   );
@@ -23,4 +23,4 @@ function flatAvatarUpload(req, res, next) {
     }
   });
 }
-module.exports = flatAvatarUpload;
+module.exports = fileUpload;
