@@ -19,8 +19,9 @@ model files {
 }
 
 model users {
+  id       Int    @id @default(autoincrement())
   name     String @db.VarChar(255)
+  email    String @db.VarChar(255)
   password String @db.VarChar(200)
-  email    String @id @db.VarChar(255)
   status   String @default("active") @db.VarChar(255)
 }

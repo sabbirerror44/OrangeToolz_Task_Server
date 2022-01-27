@@ -16,9 +16,6 @@ async function addUser(req, res, next) {
      const toBeAddedUser = await prisma.users.create({
        data: newUser
    });
-
-   console.log(toBeAddedUser);
- 
    res.json({ message: "User created successfully"});
    
   } catch (error) {
@@ -29,11 +26,10 @@ async function addUser(req, res, next) {
 //User login
 async function userLogin(req, res, next) {
   try {
-    const {name, email, password, status } = req.body;
-    //find a user who has this email
-    const user = await prisma.users.findUnique({
+    const { username, password } = req.body;
+    const user = await prisma.users.findFirst({
      where: { 
-        email: email,
+        email: username,
      }
     });
 
@@ -43,27 +39,13 @@ async function userLogin(req, res, next) {
         user.password
       );
       if (isValidPassword) {
-        //prepare the user object to generate token
         const userObject = {
           name: user.name,
           email: user.email,
         };
-
-        const token = jwt.sign(
-          {
-            name: user.name,
-            email: user.email,
-          },
-          process.env.JWT_SECRET,
-          {
-            expiresIn: '2 days',
-          }
-        );
-
         res.status(200).json({
           role: 'user',
           user: userObject,
-          access_token: token,
           message: "User Logged In successfully!",
         });
       } else {
@@ -81,7 +63,7 @@ async function userLogin(req, res, next) {
 async function getAllUsers(req, res, next) {
   try {
     const Users = await prisma.users.findMany({});
-    res.status(200).json({Users});
+    res.status(200).json(Users);
   } catch (error) {
      next(error);
   }
@@ -91,16 +73,20 @@ async function getAllUsers(req, res, next) {
 //Update User
 async function updateUser(req, res, next){
   try {
-      const updatedUser = await prisma.users.update({
+        await prisma.users.update({
           where: {
-              email: req.params.email,
+              id: Number(req.params.id),
           },
           data: req.body
       });
-      res.json(updatedUser);
+      res.status(200).json({
+        message: "User updated successfully!",
+      });
       
   } catch (error) {
-      next(error);        
+    res.status(500).json({
+      message: "Couldn't update the user!"
+    });         
   }
 
 }
@@ -118,16 +104,19 @@ async function updateUserStatus(req, res, next){
       }
       const updatedUser = await prisma.users.update({
           where: {
-              email: req.params.email,
+              id: Number(req.params.id),
           },
           data: {
             status: status
           }
       });
-      res.json(updatedUser);
-      
+      res.status(200).json({
+        message: "Status updated successfully!",
+      });
   } catch (error) {
-      next(error);        
+    res.status(500).json({
+      message: "Couldn't update the status!"
+    });       
   }
 
 }
@@ -135,16 +124,21 @@ async function updateUserStatus(req, res, next){
 //delete User
 async function deleteUser(req, res, next){
     try {
-        const deletedUser = await prisma.users.delete({
+      console.log(req.params.id);
+      await prisma.users.delete({
             where: {
-                email: req.params.email,
+                id: Number(req.params.id),
             },
         });
-        res.json(deletedUser);
+        res.status(200).json({
+          message: "User deleted successfully!",
+        });
         
-    } catch (error) {
-        next(error);        
-    }
+    } catch (err) {
+      res.status(500).json({
+        message: "Couldn't delete the user!"
+      });
+    }     
   
 }
 
