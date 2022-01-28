@@ -147,28 +147,52 @@ async function deleteUser(req, res, next){
 
 // upload file and file info
 async function uploadFile(req, res, next) {
+  // console.log(req);
   const { id, name, split } = req.body;
   const results = [];
   const groups = [];
   let subGroup = [];
-  let newfile;
-  if (req.files && req.files.length > 0) {
+  var totalUploadedFileCounter;
+  var totalProcessedFileCounter;
+  var fileObject = null;
+  var mainFileId = null;
+  var chunkObject = null;
 
-    fs.createReadStream(`${__dirname}/../public/uploads/files/${req.files[0].filename}`)
-      .pipe(csv({}))
-      .on('data', (data) => results.push(data))
-      .on('end', () => {
-        const totalUploadedFile = results.length;
-        const output = 
-        results.map(result => {
-          let isnum = /^\d+$/.test(result.number) && result.number.length<=12;
-          if(isnum === true){
-            return result
-          }
-        })
+  if(!req.files && req.files.length < 0){
+    throw new Error('No files to upload');
+  }
+
+  // if (req.files && req.files.length > 0) {
+
+      fs.createReadStream(`${__dirname}/../public/uploads/files/${req.files[0].filename}`)
+        .pipe(csv({}))
+        .on('data', (data) => results.push(data))
+        .on('end', () => {
+          const totalUploadedFileCounter = results.length;
+          const output = 
+          results.map(result => {
+            let isnum = /^\d+$/.test(result.number) && result.number.length<=12;
+            if(isnum === true){
+              return result
+            }
+          })
         const totalProcessedFile = output.filter(function( element ) {
           return element !== undefined;
        });
+       
+
+       totalProcessedFileCounter = totalProcessedFile.length;
+
+        fileObject = {
+         user_id: Number(id),
+         name,
+         file: `${__dirname}/../public/uploads/files/${req.files[0].filename}`,
+         total_uploaded_file: totalUploadedFileCounter,
+         total_processed_file: totalProcessedFileCounter
+
+       }
+
+      savedFile(fileObject);
 
        let count = 0;
        for(let i=0; i<totalProcessedFile.length; i++){
@@ -194,6 +218,7 @@ async function uploadFile(req, res, next) {
             console.log('csv File written successfully');
         });
 
+
             groups.push(subGroup);
             subGroup=[];
               }
@@ -214,42 +239,25 @@ async function uploadFile(req, res, next) {
                 ]
             });
             const records = subGroup;
+
         
             csvWriter.writeRecords(records)       // returns a promise
             .then(() => {
                 console.log('csv File written successfully');
             });
 
-              groups.push(subGroup);
-
-              // console.log(subGroup);
-              //write chunk file
-              //add to chunk table 
-              //insert subGroup content into contact table
-          }
-          
-
-
-      //  console.log(totalUploadedFile);
-      //  console.log(totalProcessedFile.length);      
+             groups.push(subGroup);
+          }    
         
       });
 
-
-  }
- 
-
-
-
-  // const newfile = {...req.body, file: req.files[0].filename }
   //save file or send error
+async function savedFile(fileObject) {
     try {
-      // const toBeAddedFile = await prisma.files.create({
-      //   data: newfile
-      // });
-
-      // console.log(newfile);
-
+      const toBeAddedFile = await prisma.files.create({
+        data: fileObject
+      });
+      mainFileId = toBeAddedFile.id;
       res.status(200).json({
         message: "File added successfully!",
       });
@@ -263,7 +271,23 @@ async function uploadFile(req, res, next) {
       });
     }
   }
+}
 
+
+async function getFilesByUserId(req, res, next) {
+  try {
+    const {id} = req.params;
+    const Files = await prisma.files.findMany({
+      where: {
+        user_id: Number(id)
+      },     
+    });
+    console.log(Files);
+    res.status(200).json(Files);
+  } catch (error) {
+     next(error);
+  }
+}
 
 module.exports = {
     addUser,
@@ -272,5 +296,6 @@ module.exports = {
     updateUser,
     deleteUser,
     updateUserStatus,
-    uploadFile,   
+    uploadFile,
+    getFilesByUserId,   
 }

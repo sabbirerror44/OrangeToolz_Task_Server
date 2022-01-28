@@ -11,6 +11,9 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cors());
 app.use(morgan('dev'));
 
+//set static folder
+// app.use(express.static(path.join(__dirname, "public")));
+
 //internal imports
 const usersRouter = require('./routers/usersRouter')
 const adminRouter = require('./routers/adminRouter')

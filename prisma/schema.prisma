@@ -13,7 +13,7 @@ model admin {
 }
 
 model chunks {
-  id         BigInt    @id @default(autoincrement())
+  id         Int    @id @default(autoincrement())
   file_id    Int
   name       String    @db.VarChar(255)
   path       String    @db.Text
@@ -25,10 +25,10 @@ model chunks {
 }
 
 model contact {
-  id         BigInt   @id @default(autoincrement())
+  id         Int   @id @default(autoincrement())
   file_id    Int?
-  chunk_id   BigInt?
-  number     BigInt
+  chunk_id   Int?
+  number     Int
   firstname  String?  @db.VarChar(255)
   lastname   String?  @db.VarChar(255)
   email      String?  @db.VarChar(255)
@@ -45,8 +45,8 @@ model files {
   user_id              Int
   name                 String   @db.VarChar(255)
   file                 String   @db.VarChar(255)
-  total_uploaded_file  BigInt
-  total_processed_file BigInt
+  total_uploaded_file  Int
+  total_processed_file Int
   chunks               chunks[]
 }
 
