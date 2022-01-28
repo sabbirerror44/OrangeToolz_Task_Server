@@ -2,6 +2,7 @@
 const multer = require("multer");
 const path = require("path");
 const createError = require("http-errors");
+const fs = require('fs');
 
 function uploader(
   subfolder_path,
@@ -10,6 +11,7 @@ function uploader(
   error_msg
 ) {
   //File upload folder
+  fs.mkdir = `${__dirname}/../public/uploads/${subfolder_path}/`
   const UPLOADS_FOLDER = `${__dirname}/../public/uploads/${subfolder_path}/`;
 
   //define the storage
@@ -18,16 +20,9 @@ function uploader(
       cb(null, UPLOADS_FOLDER);
     },
     filename: (req, file, cb) => {
+      const name = req.body.name;
       const fileExt = path.extname(file.originalname);
-      const fileName =
-        file.originalname
-          .replace(fileExt, "")
-          .toLowerCase()
-          .split(" ")
-          .join("-") +
-        "-" +
-        Date.now();
-
+      const fileName = name;
       cb(null, fileName + fileExt);
     },
   });

@@ -1,8 +1,9 @@
 const bcrypt = require('bcrypt');
-const jwt = require("jsonwebtoken");
 const {PrismaClient} = require('@prisma/client');
 const prisma = new PrismaClient();
 const createError = require("http-errors");
+const csv = require('csv-parser');
+const fs = require('fs');
 
 
 //Registration of o new user
@@ -144,8 +145,48 @@ async function deleteUser(req, res, next){
 
 // upload file and file info
 async function uploadFile(req, res, next) {
+  const { name, split } = req.body;
+  const results = [];
+  const groups = [];
+  let subGroup = [];
   let newfile;
   if (req.files && req.files.length > 0) {
+
+    fs.createReadStream(`${__dirname}/../public/uploads/files/${req.files[0].filename}`)
+      .pipe(csv({}))
+      .on('data', (data) => results.push(data))
+      .on('end', () => {
+        const totalUploadedFile = results.length;
+        const output = 
+        results.map(result => {
+          let isnum = /^\d+$/.test(result.number) && result.number.length<=12;
+          if(isnum === true){
+            return result
+          }
+        })
+        const totalProcessedFile = output.filter(function( element ) {
+          return element !== undefined;
+       });
+
+       for(let i=0; i<totalProcessedFile.length; i++){
+        subGroup .push(totalProcessedFile[i]);
+        if((i+1) % Number(split) === 0){
+            groups.push(subGroup);
+            subGroup=[];
+              }
+          }
+          
+          if(subGroup.length !== 0 && subGroup.length < Number(split)){
+              groups.push(subGroup);
+          }
+          
+          console.log(groups);
+
+      //  console.log(totalUploadedFile);
+      //  console.log(totalProcessedFile.length);      
+        
+      });
+
 
   const newfile = {...req.body, file: req.files[0].filename }
   //save file or send error
