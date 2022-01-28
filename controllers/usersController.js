@@ -4,7 +4,8 @@ const prisma = new PrismaClient();
 const createError = require("http-errors");
 const csv = require('csv-parser');
 const fs = require('fs');
-
+const createCsvWriter = require('csv-writer').createObjectCsvWriter;
+const ObjectsToCsv = require('objects-to-csv')
 
 //Registration of o new user
 async function addUser(req, res, next) {
@@ -168,19 +169,65 @@ async function uploadFile(req, res, next) {
           return element !== undefined;
        });
 
+       let count = 0;
        for(let i=0; i<totalProcessedFile.length; i++){
-        subGroup .push(totalProcessedFile[i]);
+        subGroup.push(totalProcessedFile[i]);
         if((i+1) % Number(split) === 0){
+          count = count + 1;
+          
+          const csvWriter = createCsvWriter({
+            path: `${__dirname}/../public/uploads/files/${name}${count}.csv`,
+            header: [
+                {id: 'number', title: 'number'},
+                {id: 'first name', title: 'first name'},
+                {id: 'last name', title: 'last name'},
+                {id: 'email', title: 'email'},
+                {id: 'state', title: 'state'},
+                {id: 'zip', title: 'zip'}
+            ]
+        });
+        const records = subGroup;
+    
+        csvWriter.writeRecords(records)       // returns a promise
+        .then(() => {
+            console.log('csv File written successfully');
+        });
+
             groups.push(subGroup);
             subGroup=[];
               }
           }
           
           if(subGroup.length !== 0 && subGroup.length < Number(split)){
+              count = count+1;
+
+              const csvWriter = createCsvWriter({
+                path: `${__dirname}/../public/uploads/files/${name}${count}.csv`,
+                header: [
+                    {id: 'number', title: 'number'},
+                    {id: 'first name', title: 'first name'},
+                    {id: 'last name', title: 'last name'},
+                    {id: 'email', title: 'email'},
+                    {id: 'state', title: 'state'},
+                    {id: 'zip', title: 'zip'}
+                ]
+            });
+            const records = subGroup;
+        
+            csvWriter.writeRecords(records)       // returns a promise
+            .then(() => {
+                console.log('csv File written successfully');
+            });
+
               groups.push(subGroup);
+
+              // console.log(subGroup);
+              //write chunk file
+              //add to chunk table 
+              //insert subGroup content into contact table
           }
           
-          console.log(groups);
+
 
       //  console.log(totalUploadedFile);
       //  console.log(totalProcessedFile.length);      
@@ -188,14 +235,19 @@ async function uploadFile(req, res, next) {
       });
 
 
-  const newfile = {...req.body, file: req.files[0].filename }
+  }
+ 
+
+
+
+  // const newfile = {...req.body, file: req.files[0].filename }
   //save file or send error
     try {
       // const toBeAddedFile = await prisma.files.create({
       //   data: newfile
       // });
 
-      console.log(newfile);
+      // console.log(newfile);
 
       res.status(200).json({
         message: "File added successfully!",
@@ -210,7 +262,6 @@ async function uploadFile(req, res, next) {
       });
     }
   }
-}
 
 
 module.exports = {
