@@ -42,6 +42,7 @@ async function userLogin(req, res, next) {
       );
       if (isValidPassword) {
         const userObject = {
+          id: user.id,
           name: user.name,
           email: user.email,
         };
@@ -146,7 +147,7 @@ async function deleteUser(req, res, next){
 
 // upload file and file info
 async function uploadFile(req, res, next) {
-  const { name, split } = req.body;
+  const { id, name, split } = req.body;
   const results = [];
   const groups = [];
   let subGroup = [];

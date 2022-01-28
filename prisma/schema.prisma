@@ -41,10 +41,13 @@ model contact {
 }
 
 model files {
-  id     Int      @id @default(autoincrement())
-  name   String   @db.VarChar(255)
-  file   String   @db.VarChar(255)
-  chunks chunks[]
+  id                   Int      @id @default(autoincrement())
+  user_id              Int
+  name                 String   @db.VarChar(255)
+  file                 String   @db.VarChar(255)
+  total_uploaded_file  BigInt
+  total_processed_file BigInt
+  chunks               chunks[]
 }
 
 model users {
